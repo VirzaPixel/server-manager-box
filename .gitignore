@@ -1,0 +1,36 @@
+# ====================================================================
+# GITIGNORE UNTUK PROJECT SERVER STORAGE (LAPTOP KENTANG & UTAMA)
+# ====================================================================
+
+# 1. Aplikasi & File Binary (Wajib diabaikan agar tidak memperberat repo)
+ngrok.exe
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 2. File Kompresi & Cadangan (Backup)
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 3. Cache Python (File sampah otomatis hasil running Python)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 4. File Sistem Windows (File hidden otomatis dari OS)
+Thumbs.db
+Desktop.ini
+
+# ====================================================================
+# CATATAN UNTUK FOLDER ASET 'alfal':
+# Karena lu mau fokus push 'app.py' aja, baris di bawah ini sengaja
+# gue aktifin supaya folder 'alfal' gak ikut ke-upload ke GitHub 
+# kalau di dalamnya nanti udah lu isi lagu-lagu (.mp3) yang bergiga-giga.
+# ====================================================================
+/alfal
+README.md
+.env
