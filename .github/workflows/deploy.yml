@@ -1,0 +1,17 @@
+name: Automatic pull
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Do some pull request
+        shell: cmd
+        run: |
+          cd "${{ secrets.PROJECT_PATH }}"
+          git pull origin main
