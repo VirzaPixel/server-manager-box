@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Do some pull request
         shell: cmd
+        env:
+          TARGET_DIR: ${{ secrets.PROJECT_PATH }}
         run: |
-          cd "${{ secrets.PROJECT_PATH }}"
+          cd /d "%TARGET_DIR%"
           git pull origin main
