@@ -41,10 +41,10 @@ def get_file(category, filename):
 @app.route('/upload/<category>', methods=['POST'])
 def upload_file(category):
     if category not in ALLOWED_CATEGORIES:
-        return jsonify({'error': 'Kategori folder tidak valid'}), 400
+        return jsonify({'error': 'Kategori folder tidak valid !'}), 400
     
     if 'file' not in request.files:
-        return jsonify({'error': 'Tidak ada file yang dikirim'}), 400
+        return jsonify({'error': 'Tidak ada file yang dikirim !'}), 400
     
     file = request.files['file']
     if file.filename == '':
