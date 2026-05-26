@@ -17,4 +17,6 @@ jobs:
           TARGET_DIR: ${{ secrets.PROJECT_PATH }}
         run: |
           cd /d "%TARGET_DIR%"
-          git pull origin main
+          git fetch origin main
+          # pull with git reset
+          git reset --hard origin/main
