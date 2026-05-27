@@ -35,4 +35,4 @@ jobs:
           set MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%
 
           ::  nyalakan server
-          start /b python app.py
+          start /B /D "%TARGET_DIR%" python app.py
