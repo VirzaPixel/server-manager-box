@@ -28,17 +28,25 @@ for folder in BASE_UPLOAD_FOLDER:
             os.makedirs(category_path)
 
 ## Read
-@app.route('/files/<category>/<filename>', methods=['GET'], defaults={'folder': 'alfal'})
+@app.route('/files/<category>/<filename>', methods=['GET'])
+def get_file(category, filename):
+    if category not in ALLOWED_CATEGORIES:
+        return jsonify({'error': 'Kategori folder tidak valid'}), 400
+    
+    target_dir = os.path.join('alfal', category)
+    return send_from_directory(target_dir, filename)
+
+
+## 2. Read new format
 @app.route('/files/<folder>/<category>/<filename>', methods=['GET'])
 def get_new_file(folder, category, filename):
     if folder not in BASE_UPLOAD_FOLDER:
-        return jsonify({'error': f'Folder utama ({folder}) tidak valid'}), 400 
-    
+        return jsonify({'error': f'Folder utama ({folder}) tidak valid'}), 400
+        
     if category not in ALLOWED_CATEGORIES:
-        return jsonify({'error': f'Kategory tidak valid !'}), 400
+        return jsonify({'error': 'Kategori folder tidak valid'}), 400
     
     target_dir = os.path.join(folder, category)
-
     return send_from_directory(target_dir, filename)
 
 ## Create
