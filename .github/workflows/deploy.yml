@@ -15,8 +15,24 @@ jobs:
         shell: cmd
         env:
           TARGET_DIR: ${{ secrets.PROJECT_PATH }}
+          SECRET_FOLDER: ${{ secrets.ENV_BASE_UPLOAD_FOLDER }}
+          SECRET_CATEGORIES: ${{ secrets.ENV_ALLOWED_CATEGORIES }}
+          SECRET_URL: ${{ secrets.ENV_BASE_PUBLIC_URL }}
+          SECRET_MAX_SIZE: ${{ secrets.ENV_MAX_CONTENT_LENGTH }}
         run: |
           cd /d "%TARGET_DIR%"
           git fetch origin main
           # pull with git reset
           git reset --hard origin/main
+
+          #  matikan server
+          taskkill /IM python.exe /F 2>nul
+
+          # Set variable
+          set BASE_PUBLIC_URL=%SECRET_URL%
+          set BASE_UPLOAD_FOLDER=%SECRET_FOLDER%
+          set ALLOWED_CATEGORIES=%SECRET_CATEGORIES%
+          set MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%
+
+          #  nyalakan server
+          start /b python app.py

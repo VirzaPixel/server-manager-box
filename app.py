@@ -1,9 +1,6 @@
 import os
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = Flask(__name__)
 
