@@ -25,14 +25,14 @@ jobs:
           # pull with git reset
           git reset --hard origin/main
 
-          #  matikan server
+          ::  matikan server
           taskkill /IM python.exe /F 2>nul
 
-          # Set variable
+          :: Set variable
           set BASE_PUBLIC_URL=%SECRET_URL%
           set BASE_UPLOAD_FOLDER=%SECRET_FOLDER%
           set ALLOWED_CATEGORIES=%SECRET_CATEGORIES%
           set MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%
 
-          #  nyalakan server
+          ::  nyalakan server
           start /b python app.py
