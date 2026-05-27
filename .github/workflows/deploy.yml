@@ -28,11 +28,16 @@ jobs:
           ::  matikan server
           taskkill /IM python.exe /F 2>nul
 
-          :: Set variable
-          set BASE_PUBLIC_URL=%SECRET_URL%
-          set BASE_UPLOAD_FOLDER=%SECRET_FOLDER%
-          set ALLOWED_CATEGORIES=%SECRET_CATEGORIES%
-          set MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%
+          :: Rewrite secrets -> env
+          (echo BASE_PUBLIC_URL=%SECRET_URL%) > .env
+          (echo BASE_UPLOAD_FOLDER=%SECRET_FOLDER%) >> .env
+          (echo ALLOWED_CATEGORIES=%SECRET_CATEGORIES%) >> .env
+          (echo MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%) >> .env
 
           ::  nyalakan server
-          start /B /D "%TARGET_DIR%" python app.py
+          echo Set WshShell = CreateObject("WScript.Shell") > run_bg.vbs
+          echo WshShell.Run "python app.py", 0, False >> run_bg.vbs
+
+          wscript.exe run_bg.vbs
+
+          del run_bg.vbs

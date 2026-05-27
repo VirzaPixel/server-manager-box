@@ -1,6 +1,9 @@
 import os
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -37,7 +40,7 @@ def get_file(category, filename):
     return send_from_directory(target_dir, filename)
 
 
-## 2. Read new format
+## Read new format
 @app.route('/files/<folder>/<category>/<filename>', methods=['GET'])
 def get_new_file(folder, category, filename):
     if folder not in BASE_UPLOAD_FOLDER:
