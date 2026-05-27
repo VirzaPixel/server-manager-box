@@ -35,4 +35,4 @@ jobs:
           (echo MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%) >> .env
 
           ::  nyalakan server
-          start "" /B and /c "python app.py"
+          start "" /B cmd /c "python app.py"
