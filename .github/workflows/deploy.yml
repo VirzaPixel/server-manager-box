@@ -35,9 +35,4 @@ jobs:
           (echo MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%) >> .env
 
           ::  nyalakan server
-          echo Set WshShell = CreateObject("WScript.Shell") > run_bg.vbs
-          echo WshShell.Run "python app.py", 0, False >> run_bg.vbs
-
-          wscript.exe run_bg.vbs
-
-          del run_bg.vbs
+          start "" /B and /c "python app.py"

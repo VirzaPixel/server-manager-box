@@ -107,8 +107,11 @@ def update_file(folder, category, filename):
         return jsonify({'error': 'Tidak ada file yang dikirim !'}), 400
     
     file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'Name file baru kosong'}), 400
 
     os.remove(file_path)
+    
     new_filename = secure_filename(file.filename)
     file.save(os.path.join(target_dir, new_filename))
 
@@ -139,7 +142,7 @@ def delete_file(folder, category, filename):
     if os.path.exists(file_path):
         os.remove(file_path)
         return jsonify({
-            'message': f"Berhasil menghapus file{filename} di kategori {category}",
+            'message': f"Berhasil menghapus file {filename} di kategori {category}",
         }), 200
     else:
         return jsonify({
