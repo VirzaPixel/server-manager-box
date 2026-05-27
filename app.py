@@ -28,7 +28,7 @@ for folder in BASE_UPLOAD_FOLDER:
             os.makedirs(category_path)
 
 ## Read
-@app.route('/files/<category>/<filename>', methods=['GET'])
+@app.route('/files/<category>/<filename>', methods=['GET'], defaults={'folder': 'alfal'})
 @app.route('/files/<folder>/<category>/<filename>', methods=['GET'])
 def get_new_file(folder, category, filename):
     if folder not in BASE_UPLOAD_FOLDER:
