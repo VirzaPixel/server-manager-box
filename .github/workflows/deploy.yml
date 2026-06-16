@@ -37,4 +37,4 @@ jobs:
           (echo API_KEY=%SECRET_API_KEY%) >> .env
 
           ::  nyalakan server
-          start "Flask Server" /D "%TARGET_DIR%" cmd /k "python app.py"
+          python app.py
