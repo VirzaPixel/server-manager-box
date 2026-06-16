@@ -34,5 +34,5 @@ jobs:
           (echo API_KEY=%SECRET_API_KEY%) >> .env
 
           :: Restart flask server
-
-          nssm restart flask-app
+          nssm stop flask-app
+          nssm start flask-app
