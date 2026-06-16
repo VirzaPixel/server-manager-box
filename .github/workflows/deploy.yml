@@ -37,4 +37,4 @@ jobs:
           (echo API_KEY=%SECRET_API_KEY%) >> .env
 
           ::  nyalakan server flask
-          START /B /D "%TARGET_DIR%" python app.py
+          START /B /D "%TARGET_DIR%" cmd /c "python app.py > "%TARGET_DIR%\flask.log" 2>&1"
