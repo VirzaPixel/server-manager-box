@@ -26,9 +26,6 @@ jobs:
           :: pull with git reset
           git reset --hard origin/main
 
-          ::  matikan server
-          taskkill /IM python.exe /F 2>nul
-
           :: Rewrite secrets -> env
           (echo BASE_PUBLIC_URL=%SECRET_URL%) > .env
           (echo BASE_UPLOAD_FOLDER=%SECRET_FOLDER%) >> .env
@@ -36,5 +33,6 @@ jobs:
           (echo MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%) >> .env
           (echo API_KEY=%SECRET_API_KEY%) >> .env
 
-          ::  nyalakan server flask
-          START /B /D "%TARGET_DIR%" cmd /c "python app.py > "%TARGET_DIR%\flask.log" 2>&1"
+          :: Restart flask server
+
+          nssm restart flask-app
