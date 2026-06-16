@@ -37,4 +37,4 @@ jobs:
           (echo API_KEY=%SECRET_API_KEY%) >> .env
 
           ::  nyalakan server flask
-          powershell -Command "Start-Process python -ArgumentList 'app.py' -WorkingDirectory '%TARGET_DIR%'"
+          start /B python.exe app.py
