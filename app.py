@@ -1,4 +1,5 @@
 import os
+from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
@@ -6,6 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+
+## api key
+API_KEY = os.environ.get("API_KEY", '')
 
 ## url
 BASE_PUBLIC_URL = os.environ.get('BASE_PUBLIC_URL', '')
@@ -29,6 +33,21 @@ for folder in BASE_UPLOAD_FOLDER:
         category_path = os.path.join(folder, category)
         if not os.path.exists(category_path):
             os.makedirs(category_path)
+
+## api key validator
+def require_api_key(f):
+    @wraps(f)
+    def validator_func(*args, **kwargs):
+        user_api_key = request.headers.get("X-API-KEY")
+
+        if not user_api_key:
+            return jsonify({'error': 'Api key tidak ditemukan !'}), 401
+        elif user_api_key != API_KEY:
+            return jsonify({'error': 'Api key salah !'}), 403
+        
+        return f(*args, **kwargs)
+    
+    return validator_func
 
 ## Read
 @app.route('/files/<category>/<filename>', methods=['GET'])
@@ -54,6 +73,7 @@ def get_new_file(folder, category, filename):
 
 ## Create
 @app.route('/upload/<folder>/<category>', methods=['POST'])
+@require_api_key
 def upload_file(folder, category):
     if folder not in BASE_UPLOAD_FOLDER:
         return jsonify({'error': 'Folder utama tidak valid'}), 400
@@ -84,11 +104,13 @@ def upload_file(folder, category):
     
 ## Create old format
 @app.route('/upload/<category>', methods=['POST'])
+@require_api_key
 def old_upload_file(category):
     return upload_file(folder='alfal', category=category)
 
 ## Update
 @app.route('/update/<folder>/<category>/<filename>', methods=['PUT'])
+@require_api_key
 def update_file(folder, category, filename):
 
     if folder not in BASE_UPLOAD_FOLDER:
@@ -123,11 +145,13 @@ def update_file(folder, category, filename):
 
 ## Update old format
 @app.route('/update/<category>/<filename>', methods=['PUT'])
+@require_api_key
 def update_file_old(category, filename):
     return update_file(folder='alfal', category=category, filename=filename)
 
 ## Delete
 @app.route('/delete/<folder>/<category>/<filename>', methods=['DELETE'])
+@require_api_key
 def delete_file(folder, category, filename):
 
     if folder not in BASE_UPLOAD_FOLDER:
@@ -151,6 +175,7 @@ def delete_file(folder, category, filename):
     
 ## Delete old format
 @app.route('/delete/<category>/<filename>', methods=['DELETE'])
+@require_api_key
 def delete_file_old(category, filename):
     return delete_file(folder='alfal', category=category, filename=filename)
 

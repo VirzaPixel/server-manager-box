@@ -19,6 +19,7 @@ jobs:
           SECRET_CATEGORIES: ${{ secrets.ENV_ALLOWED_CATEGORIES }}
           SECRET_URL: ${{ secrets.ENV_BASE_PUBLIC_URL }}
           SECRET_MAX_SIZE: ${{ secrets.ENV_MAX_CONTENT_LENGTH }}
+          SECRET_API_KEY: ${{ secrets.ENV_API_KEY }}
         run: |
           cd /d "%TARGET_DIR%"
           git fetch origin main
@@ -33,6 +34,7 @@ jobs:
           (echo BASE_UPLOAD_FOLDER=%SECRET_FOLDER%) >> .env
           (echo ALLOWED_CATEGORIES=%SECRET_CATEGORIES%) >> .env
           (echo MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%) >> .env
+          (echo API_KEY=%SECRET_API_KEY%) >> .env
 
           ::  nyalakan server
           start "" /B cmd /c "python app.py"
