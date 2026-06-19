@@ -3,10 +3,16 @@ from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+from supabase import create_client, Client
 
 load_dotenv()
 
 app = Flask(__name__)
+
+## supabase
+SUPABASE_URL = os.environ.get("SUPABASE_URL", '')
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", '')
+supabase: Client = None
 
 ## api key
 API_KEY = os.environ.get("API_KEY", '')
@@ -25,6 +31,13 @@ ALLOWED_CATEGORIES = [c.strip() for c in categories_raw.split(',') if c.strip()]
 
 ## max file length
 app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
+
+if SUPABASE_URL and SUPABASE_KEY:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("Berhasil Terkoneksi ke Supabase")
+    except Exception as e:
+        print(f"Tidak berhasil Terkoneksi ke Supabase: {e}")
 
 for folder in BASE_UPLOAD_FOLDER:
     if not os.path.exists(folder):
@@ -91,12 +104,29 @@ def upload_file(folder, category):
     if file:
         filename = secure_filename(file.filename)
         target_dir = os.path.join(folder, category)
+        file_path = os.path.join(target_dir, filename)
 
         # save file to folder
-        file.save(os.path.join(target_dir, filename))
+        file.save(file_path)
 
         url_publik = f"https://{BASE_PUBLIC_URL}/files/{folder}/{category}/{filename}"
 
+        file_size = os.path.getsize(file_path)
+
+        if supabase:
+            try:
+                ## delete duplicate filename
+                supabase.table("files").delete().eq("name", filename).eq("folder", folder).eq("category", category).execute()
+                supabase.table("files").insert({
+                    "name": filename,
+                    "url": url_publik,
+                    "folder": folder,
+                    "category": category,
+                    "size_bytes": file_size
+                }).execute()
+            except Exception as e:
+                print(f"Gagal menambah data: {e}")
+            
         return jsonify({
             'message': f"Upload ke {category} Berhasil !",
             'url' : url_publik
@@ -135,9 +165,27 @@ def update_file(folder, category, filename):
     os.remove(file_path)
     
     new_filename = secure_filename(file.filename)
-    file.save(os.path.join(target_dir, new_filename))
+    new_file_path = os.path.join(target_dir, new_filename)
+    file.save(new_file_path)
 
     url_publik = f"https://{BASE_PUBLIC_URL}/files/{folder}/{category}/{new_filename}"
+
+    new_file_size = os.path.getsize(new_file_path)
+
+    if supabase:
+        try:
+            ## delete duplicate file
+            supabase.table("files").delete().eq("name", filename).eq("folder", folder).eq("category", category).execute()
+            supabase.table("files").insert({
+                "name": new_filename,
+                "url": url_publik,
+                "folder": folder,
+                "category": category,
+                "size_bytes": new_file_size
+            }).execute()
+        except Exception as e:
+            print(f"Gagal Update data: {e}")    
+
     return jsonify({
         'message': f"Berhasil Update !",
         'url': url_publik
@@ -165,9 +213,17 @@ def delete_file(folder, category, filename):
     
     if os.path.exists(file_path):
         os.remove(file_path)
+
+        if supabase:
+            try:
+                supabase.table("files").delete().eq("name", filename).eq("folder", folder).eq("category", category).execute()
+            except Exception as e:
+                print(f"Gagal Menghapus file{e}")
+            
         return jsonify({
             'message': f"Berhasil menghapus file {filename} di kategori {category}",
         }), 200
+    
     else:
         return jsonify({
             'error': "File tidak ditemukan !"
@@ -178,13 +234,49 @@ def delete_file(folder, category, filename):
 @require_api_key
 def delete_file_old(category, filename):
     return delete_file(folder='alfal', category=category, filename=filename)
-
     
+## skipping ngrok web secure
 @app.after_request
 def app_header(response):
     response.headers['ngrok-skip-browser-warning'] = 'true'
     return response
 
+## auto sync for automatic rewrite the 
+def sync_files():
+    if not supabase:
+        return 
+    print("Memulai Auto-Sync...")
+    for folder in BASE_UPLOAD_FOLDER:
+        for category in ALLOWED_CATEGORIES:
+            target_dir = os.path.join(folder, category)
+            if not os.path.exists(target_dir):
+                continue
+
+            files_in_folder = os.listdir(target_dir)
+            for filename in files_in_folder:
+                file_path = os.path.join(target_dir, filename)
+                if os.path.isdir(file_path):
+                    continue
+                try:
+                    response = supabase.table("files").select("id").eq("name", filename).eq("folder", folder).eq("category", category).execute()
+                    if not response.data:
+                        file_size = os.path.getsize(file_path)
+                    
+                        url_publik = f"https://{BASE_PUBLIC_URL}/files/{folder}/{category}/{filename}"
+
+                        supabase.table("files").insert({
+                            "name": filename,
+                            "url": url_publik,
+                            "folder": folder,
+                            "category": category,
+                            "size_bytes": file_size
+                        }).execute()
+                        print(f"Auto-Sync: Berhasil mendaftarkan {filename}")
+                except Exception as e:
+                    print(f"Gagal Auto-sync: {e}")
+
+
 # configures the debug True for workflows working
 if __name__ == "__main__":
+    sync_files()
     app.run(host='0.0.0.0', port=8000, debug=False)

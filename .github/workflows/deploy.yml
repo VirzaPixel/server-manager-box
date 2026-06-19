@@ -20,6 +20,8 @@ jobs:
           SECRET_URL: ${{ secrets.ENV_BASE_PUBLIC_URL }}
           SECRET_MAX_SIZE: ${{ secrets.ENV_MAX_CONTENT_LENGTH }}
           SECRET_API_KEY: ${{ secrets.ENV_API_KEY }}
+          SECRET_SUPABASE_URL: ${{ secrets.ENV_SUPABASE_URL }}
+          SECRET_SUPABASE_KEY: ${{ secrets.ENV_SUPABASE_KEY }}
         run: |
           cd /d "%TARGET_DIR%"
           git fetch origin main
@@ -35,5 +37,7 @@ jobs:
           (echo ALLOWED_CATEGORIES=%SECRET_CATEGORIES%) >> .env
           (echo MAX_CONTENT_LENGTH=%SECRET_MAX_SIZE%) >> .env
           (echo API_KEY=%SECRET_API_KEY%) >> .env
+          (echo SUPABASE_URL=%SECRET_SUPABASE_URL%) >> .env
+          (echo SUPABASE_KEY=%SECRET_SUPABASE_KEY%) >> .env
 
           ::  nyalakan server flask kembali (Still Working...)
