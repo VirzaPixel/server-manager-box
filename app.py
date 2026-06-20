@@ -244,41 +244,41 @@ def app_header(response):
 ### Disable Auto-Sync.
 
 ## auto sync for automatic rewrite the 
-# def sync_files():
-#     if not supabase:
-#         return 
-#     print("Memulai Auto-Sync...")
-#     for folder in BASE_UPLOAD_FOLDER:
-#         for category in ALLOWED_CATEGORIES:
-#             target_dir = os.path.join(folder, category)
-#             if not os.path.exists(target_dir):
-#                 continue
+def sync_files():
+    if not supabase:
+        return 
+    print("Memulai Auto-Sync...")
+    for folder in BASE_UPLOAD_FOLDER:
+        for category in ALLOWED_CATEGORIES:
+            target_dir = os.path.join(folder, category)
+            if not os.path.exists(target_dir):
+                continue
 
-#             files_in_folder = os.listdir(target_dir)
-#             for filename in files_in_folder:
-#                 file_path = os.path.join(target_dir, filename)
-#                 if os.path.isdir(file_path):
-#                     continue
-#                 try:
-#                     response = supabase.table("files").select("id").eq("name", filename).eq("folder", folder).eq("category", category).execute()
-#                     if not response.data:
-#                         file_size = os.path.getsize(file_path)
+            files_in_folder = os.listdir(target_dir)
+            for filename in files_in_folder:
+                file_path = os.path.join(target_dir, filename)
+                if os.path.isdir(file_path):
+                    continue
+                try:
+                    response = supabase.table("files").select("id").eq("name", filename).eq("folder", folder).eq("category", category).execute()
+                    if not response.data:
+                        file_size = os.path.getsize(file_path)
                     
-#                         url_publik = f"https://{BASE_PUBLIC_URL}/files/{folder}/{category}/{filename}"
+                        url_publik = f"https://{BASE_PUBLIC_URL}/files/{folder}/{category}/{filename}"
 
-#                         supabase.table("files").insert({
-#                             "name": filename,
-#                             "url": url_publik,
-#                             "folder": folder,
-#                             "category": category,
-#                             "size_bytes": file_size
-#                         }).execute()
-#                         print(f"Auto-Sync: Berhasil mendaftarkan {filename}")
-#                 except Exception as e:
-#                     print(f"Gagal Auto-sync: {e}")
+                        supabase.table("files").insert({
+                            "name": filename,
+                            "url": url_publik,
+                            "folder": folder,
+                            "category": category,
+                            "size_bytes": file_size
+                        }).execute()
+                        print(f"Auto-Sync: Berhasil mendaftarkan {filename}")
+                except Exception as e:
+                    print(f"Gagal Auto-sync: {e}")
 
 
 # configures the debug True for workflows working
 if __name__ == "__main__":
-    # sync_files()
+    sync_files()
     app.run(host='0.0.0.0', port=8000, debug=False)
