@@ -241,7 +241,7 @@ def app_header(response):
     response.headers['ngrok-skip-browser-warning'] = 'true'
     return response
 
-### Disable Auto-Sync
+### Disable Auto-Sync.
 
 ## auto sync for automatic rewrite the 
 # def sync_files():
