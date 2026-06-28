@@ -1,13 +1,17 @@
 import os
 from functools import wraps
+from flask_cors import CORS
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
+
 load_dotenv()
 
 app = Flask(__name__)
+
+CORS(app)
 
 ## supabase
 SUPABASE_URL = os.environ.get("SUPABASE_URL", '')
