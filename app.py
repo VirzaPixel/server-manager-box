@@ -46,10 +46,6 @@ if SUPABASE_URL and SUPABASE_KEY:
 for folder in BASE_UPLOAD_FOLDER:
     if not os.path.exists(folder):
         os.makedirs(folder)
-    for category in ALLOWED_CATEGORIES:
-        category_path = os.path.join(folder, category)
-        if not os.path.exists(category_path):
-            os.makedirs(category_path)
 
 ## api key validator
 def require_api_key(f):
@@ -101,6 +97,10 @@ def upload_file(folder, category):
     if file:
         filename = secure_filename(file.filename)
         target_dir = os.path.join(folder, category)
+
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir, exist_ok=True)
+
         file_path = os.path.join(target_dir, filename)
 
         # save file to folder
@@ -279,10 +279,6 @@ def create_folder(folder_name):
     try:
         if not os.path.exists(folder_name):
             os.makedirs(folder_path, exist_ok=True)
-
-        for category in ALLOWED_CATEGORIES:
-            category_path = os.path.join(folder_path, category)
-            os.makedirs(category_path, exist_ok=True)
 
         return jsonify({
             'message': 'Berhasil membuat folder',
