@@ -69,8 +69,6 @@ def require_api_key(f):
 ## Read
 @app.route('/files/<category>/<filename>', methods=['GET'])
 def get_file(category, filename):
-    if category not in ALLOWED_CATEGORIES:
-        return jsonify({'error': 'Kategori folder tidak valid'}), 400
     
     target_dir = os.path.join('alfal', category)
     return send_from_directory(target_dir, filename)
@@ -81,10 +79,7 @@ def get_file(category, filename):
 def get_new_file(folder, category, filename):
     if folder not in BASE_UPLOAD_FOLDER:
         return jsonify({'error': f'Folder utama ({folder}) tidak valid'}), 400
-        
-    if category not in ALLOWED_CATEGORIES:
-        return jsonify({'error': 'Kategori folder tidak valid'}), 400
-    
+
     target_dir = os.path.join(folder, category)
     return send_from_directory(target_dir, filename)
 
@@ -95,8 +90,6 @@ def upload_file(folder, category):
     if folder not in BASE_UPLOAD_FOLDER:
         return jsonify({'error': 'Folder utama tidak valid'}), 400
 
-    if category not in ALLOWED_CATEGORIES:
-        return jsonify({'error': 'Kategori folder tidak valid !'}), 400
     
     if 'file' not in request.files:
         return jsonify({'error': 'Tidak ada file yang dikirim !'}), 400
@@ -150,8 +143,6 @@ def update_file(folder, category, filename):
     if folder not in BASE_UPLOAD_FOLDER:
         return jsonify({'error': 'Folder utama tidak valid !'}), 400
 
-    if category not in ALLOWED_CATEGORIES:
-        return jsonify({'error': 'Kategori tidak Valid !'}), 400
     
     target_dir = os.path.join(folder, category)
     file_path = os.path.join(target_dir, filename)
@@ -209,9 +200,6 @@ def delete_file(folder, category, filename):
     if folder not in BASE_UPLOAD_FOLDER:
         return jsonify({'error': 'Folder utama tidak valid'}), 400
     
-    if category not in ALLOWED_CATEGORIES:
-        return jsonify({'error': 'Kategori tidak valid !'}), 400
-    
     target_dir = os.path.join(folder, category)
     file_path = os.path.join(target_dir, filename)
     
@@ -240,7 +228,6 @@ def delete_file_old(category, filename):
     return delete_file(folder='alfal', category=category, filename=filename)
     
 ## Get Folder
-
 @app.route('/folder/<folder_name>/categories', methods=['GET'])
 def get_folder_categories(folder_name):
     
@@ -256,7 +243,7 @@ def get_folder_categories(folder_name):
         categories = []
         for item in os.listdir(folder_path):
             item_path = os.path.join(folder_path, item)
-            if os.path.isdir(item_path) and item in ALLOWED_CATEGORIES:
+            if os.path.isdir(item_path):
                 file_count = len([f for f in os.listdir(item_path) if os.path.isfile(os.path.join(item_path, f))])
                 categories.append({
                     'name': item, 
