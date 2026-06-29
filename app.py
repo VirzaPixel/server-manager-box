@@ -256,7 +256,7 @@ def get_folder_categories(folder_name):
         categories = []
         for item in os.listdir(folder_path):
             item_path = os.path.join(folder_path, item)
-            if os.path.isdir(item_path):
+            if os.path.isdir(item_path) and item in ALLOWED_CATEGORIES:
                 file_count = len([f for f in os.listdir(item_path) if os.path.isfile(os.path.join(item_path, f))])
                 categories.append({
                     'name': item, 
