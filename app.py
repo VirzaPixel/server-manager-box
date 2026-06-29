@@ -239,6 +239,42 @@ def delete_file(folder, category, filename):
 def delete_file_old(category, filename):
     return delete_file(folder='alfal', category=category, filename=filename)
     
+## Get Folder
+
+@app.route('/folder/<folder_name>/categories', methods=['GET'])
+def get_folder_categories(folder_name):
+    
+    if folder_name not in BASE_UPLOAD_FOLDER:
+        return jsonify({'error': 'folder tidak valid'})
+    
+    folder_path = os.path.join(folder_name)
+
+    if not os.path.exists(folder_path):
+        return jsonify({'error': 'folder tidak ditemukan'})
+    
+    try:
+        categories = []
+        for item in os.listdir(folder_path):
+            item_path = os.path.join(folder_path, item)
+            if os.path.isdir(item_path):
+                file_count = len([f for f in os.listdir(item_path) if os.path.isfile(os.path.join(item_path, f))])
+                categories.append({
+                    'name': item, 
+                    'file_count': file_count
+                })
+        
+        categories.sort(key=lambda x: x['name'])
+
+        return jsonify({
+            'folder': folder_name,
+            'categories': categories,
+            'total_categories': len(categories)
+        }), 200
+    
+    except Exception as e:
+        return jsonify({'error': f'Gagal membaca folder: {e}'}), 500
+
+
 ## Create New Folder
 @app.route('/folder/create/<folder_name>', methods=['POST'])
 @require_api_key
