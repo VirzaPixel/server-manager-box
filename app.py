@@ -239,6 +239,35 @@ def delete_file(folder, category, filename):
 def delete_file_old(category, filename):
     return delete_file(folder='alfal', category=category, filename=filename)
     
+## Create New Folder
+@app.route('/folder/create/<folder_name>', methods=['POST'])
+@require_api_key
+def create_folder(folder_name):
+    folder_name = folder_name.strip()
+
+    if not folder_name:
+        return jsonify({'error': 'Folder name tidak boleh kosong'}), 400
+    
+    if folder_name in BASE_UPLOAD_FOLDER:
+        return jsonify({'error': 'Folder sudah ada'}), 400
+    
+    folder_path = os.path.join(folder_name)
+
+    try:
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_path, exist_ok=True)
+
+        for category in ALLOWED_CATEGORIES:
+            category_path = os.path.join(folder_path, category)
+            os.makedirs(category_path, exist_ok=True)
+
+        return jsonify({
+            'message': 'Berhasil membuat folder',
+            'folder': folder_name
+        }), 200
+    except Exception as e:
+        return jsonify({'error': f'Gagal membuat folder: {str(e)}'}), 500
+
 ## skipping ngrok web secure
 @app.after_request
 def app_header(response):
@@ -280,7 +309,6 @@ def app_header(response):
 #                         print(f"Auto-Sync: Berhasil mendaftarkan {filename}")
 #                 except Exception as e:
 #                     print(f"Gagal Auto-sync: {e}")
-
 
 ## health check
 @app.route('/', methods=['GET'])
