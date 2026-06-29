@@ -47,6 +47,10 @@ for folder in BASE_UPLOAD_FOLDER:
     if not os.path.exists(folder):
         os.makedirs(folder)
 
+def is_valid_folder(folder_name):
+    folder_path = os.path.join(folder_name)
+    return os.path.exists(folder_path) and os.path.isdir(folder_path)
+
 ## api key validator
 def require_api_key(f):
     @wraps(f)
@@ -73,7 +77,7 @@ def get_file(category, filename):
 ## Read new format
 @app.route('/files/<folder>/<category>/<filename>', methods=['GET'])
 def get_new_file(folder, category, filename):
-    if folder not in BASE_UPLOAD_FOLDER:
+    if not is_valid_folder(folder):
         return jsonify({'error': f'Folder utama ({folder}) tidak valid'}), 400
 
     target_dir = os.path.join(folder, category)
@@ -83,7 +87,7 @@ def get_new_file(folder, category, filename):
 @app.route('/upload/<folder>/<category>', methods=['POST'])
 @require_api_key
 def upload_file(folder, category):
-    if folder not in BASE_UPLOAD_FOLDER:
+    if not is_valid_folder(folder):
         return jsonify({'error': 'Folder utama tidak valid'}), 400
 
     
@@ -140,7 +144,7 @@ def old_upload_file(category):
 @require_api_key
 def update_file(folder, category, filename):
 
-    if folder not in BASE_UPLOAD_FOLDER:
+    if not is_valid_folder(folder):
         return jsonify({'error': 'Folder utama tidak valid !'}), 400
 
     
@@ -197,7 +201,7 @@ def update_file_old(category, filename):
 @require_api_key
 def delete_file(folder, category, filename):
 
-    if folder not in BASE_UPLOAD_FOLDER:
+    if not is_valid_folder(folder):
         return jsonify({'error': 'Folder utama tidak valid'}), 400
     
     target_dir = os.path.join(folder, category)
@@ -231,7 +235,7 @@ def delete_file_old(category, filename):
 @app.route('/folder/<folder_name>/categories', methods=['GET'])
 def get_folder_categories(folder_name):
     
-    if folder_name not in BASE_UPLOAD_FOLDER:
+    if not is_valid_folder(folder_name):
         return jsonify({'error': 'folder tidak valid'})
     
     folder_path = os.path.join(folder_name)
@@ -332,10 +336,24 @@ def app_header(response):
 ## health check
 @app.route('/', methods=['GET'])
 def health_check():
+
+    base_folder = os.path.dirname(os.path.abspath(__file__))
+    folders_in_disk = []
+
+    try:
+        items = os.listdir(base_folder)
+        for item in items:
+            item_path = os.path.join(base_folder, item)
+
+            if os.path.isdir(item_path) and not item.startswith('.') and item not in ['__pycache__', 'venv', 'env']:
+                folders_in_disk.append(item)
+    except Exception as e:
+        folders_in_disk = BASE_UPLOAD_FOLDER
+
     return jsonify({
         'status': 'ok',
         'message': 'Storage Manager API is running',
-        'folders': BASE_UPLOAD_FOLDER,
+        'folders': folders_in_disk,
         'categories': ALLOWED_CATEGORIES
     }), 200
 
