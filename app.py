@@ -282,6 +282,16 @@ def app_header(response):
 #                     print(f"Gagal Auto-sync: {e}")
 
 
+## health check
+@app.route('/', methods=['GET'])
+def health_check():
+    return jsonify({
+        'status': 'ok',
+        'message': 'Storage Manager API is running',
+        'folders': BASE_UPLOAD_FOLDER,
+        'categories': ALLOWED_CATEGORIES
+    }), 200
+
 # configures the debug True for workflows working
 if __name__ == "__main__":
     # sync_files()
