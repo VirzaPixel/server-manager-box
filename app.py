@@ -293,7 +293,7 @@ def create_folder(folder_name):
     except Exception as e:
         return jsonify({'error': f'Gagal membuat folder: {str(e)}'}), 500
     
-## Update Folder
+## Update Folderr
 @app.route('/folder/update/<folder_name>', methods=['PUT'])
 @require_api_key
 def update_folder(folder_name):
