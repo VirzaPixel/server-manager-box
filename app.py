@@ -1,4 +1,6 @@
 import os
+import shutil
+import re
 from functools import wraps
 from flask_cors import CORS
 from flask import Flask, request, jsonify, send_from_directory
@@ -266,7 +268,7 @@ def get_folder_categories(folder_name):
         return jsonify({'error': f'Gagal membaca folder: {e}'}), 500
 
 
-## Create New Folder
+## Create Folder
 @app.route('/folder/create/<folder_name>', methods=['POST'])
 @require_api_key
 def create_folder(folder_name):
@@ -290,7 +292,97 @@ def create_folder(folder_name):
         }), 200
     except Exception as e:
         return jsonify({'error': f'Gagal membuat folder: {str(e)}'}), 500
+    
+## Update Folder
+@app.route('/folder/update/<folder_name>', methods=['PUT'])
+@require_api_key
+def update_folder(folder_name):
+    
+    old_folder_name = folder_name
 
+    if not is_valid_folder(old_folder_name):
+        return jsonify({'error': 'Folder tidak valid atau tidak ditemukan'}), 400
+    
+    data = request.get_json()
+    if not data or 'new_name' not in data:
+        return jsonify({'error': 'Parameter "new_name" required'}), 400
+    
+    new_folder_name = data['new_name'].strip().lower().replace(' ', '-')
+
+    if not new_folder_name:
+        return jsonify({'error': 'Folder name tidak boleh kosong'}), 400
+    
+    if not re.match(r'^[a-z0-9_-]+$', new_folder_name):
+        return jsonify({'error': 'Folder name hanya boleh huruf kecil, angka, dash, underscore'}), 400
+    
+    if is_valid_folder(new_folder_name):
+        return jsonify({'error': f'Folder "{new_folder_name}" sudah ada'}), 400
+    
+    old_path = os.path.join(old_folder_name)
+    new_path = os.path.join(new_folder_name)
+
+    try:
+        os.rename(old_path, new_path)
+
+        if supabase:
+            try:
+                response = supabase.table('files').select('*').eq('folder', old_folder_name).execute()
+                files = response.data
+
+                for file in files:
+                    old_url = file['url']
+
+                    new_url = old_url.replace(f'/files/{old_folder_name}/', f'/files/{new_folder_name}/')
+
+                    supabase.table('files').update({
+                        'folder': new_folder_name,
+                        'url': new_url
+                    }).eq('id', file['id']).execute()
+
+                print(F"Berhasil Update Folder")
+            
+            except Exception as e:
+                os.rename(new_path, old_path)
+                print(f'Gagal update folder')
+
+        return jsonify({
+            'message': f'Berhasil rename folder dari {old_folder_name} ke {new_folder_name}',
+            'old_name': old_folder_name,
+            'new_name': new_folder_name,
+            'files_updated': len(files) if supabase else 0
+        }), 200
+    
+    except Exception as e:
+        return jsonify({'error': f'Gagal update folder {e}'}), 500
+    
+
+## Delete Folder
+@app.route('/folder/delete/<folder_name>', methods=['DELETE'])
+@require_api_key
+def delete_folder(folder_name):
+
+    if not is_valid_folder(folder_name):
+        return jsonify({'error': 'Folder tidak valid atau tidak ditemukan'}), 400
+
+    folder_path = os.path.join(folder_name)
+
+    try:
+        shutil.rmtree(folder_path)
+
+        if supabase:
+            try:
+                supabase.table('files').delete().eq('folder', folder_name).execute()
+            except Exception as e:
+                print(f'Gagal menghapus folder {e}')
+        
+        return jsonify({
+            'message': f'Berhasil menghapus folder {folder_name} dan Isinya',
+            'folder': folder_name
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Gagal menghapus folder {e}'}), 500
+    
 ## skipping ngrok web secure
 @app.after_request
 def app_header(response):
